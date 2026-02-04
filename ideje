@@ -1,0 +1,14 @@
+IDEJE:
+  1. Teme boja za različite vrste daltonizma - Odabir teme boja ovisno o vrsti daltonizma
+
+  2. Error isticanje - Isticanje errora uz pomoću okvira umjesto podcrtavanja
+
+  3. Povećanje - Povećavanje reda na kojem je i par redova oko kursora( ostatak može biti normalan ili zamagljen)
+
+  4. Označavanje - Za označavanje koristiti znakove(npr na početku reda ❌ ako je error, ⚠️ ako je warning...)
+
+  5. Označavanje segmenata - Npr. jedan for i sve u njemu je jedne boje ili oznake
+
+  6. Naglašavanje razlicitih objekata - Npr. varijabla je deblja ili ima pozadinu drukčije boje
+
+  7. 

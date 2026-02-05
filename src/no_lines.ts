@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { errorColor, warningColor } from './colors';
-import { error } from 'console';
 
 // Definiramo stil za Error (npr. debeli crveni pravokutnik)
 

@@ -1,12 +1,10 @@
 import * as vscode from 'vscode';
-import * as colorsModule from './colors';
-import { loadColorsFromConfig } from './test/colors';
+import { errorColor, warningColor } from './colors';
 
-// Show colored decorations for diagnostics and update them when configuration changes
 export function activate(context: vscode.ExtensionContext) {
     let errorDecorationType: vscode.TextEditorDecorationType | undefined;
     let warningDecorationType: vscode.TextEditorDecorationType | undefined;
-    // Funkcija koja ažurira pravokutnike
+    
     function updateDecorations() {
         const transparency = 0.2;
         const transparencyborder = 0.6;
@@ -68,12 +66,9 @@ export function activate(context: vscode.ExtensionContext) {
 
         activeEditor.setDecorations(errorDecorationType, errorRanges);
         activeEditor.setDecorations(warningDecorationType, warningRanges);
-
-        // vscode.window.showInformationMessage(`Pronađeno ${errorRanges.length} errora i ${warningRanges.length} warninga.`);
     }
 
-    // Pokreni pri otvaranju ili promjeni dokumenta
     vscode.window.onDidChangeActiveTextEditor(() => updateDecorations());
     vscode.languages.onDidChangeDiagnostics(() => updateDecorations());
-    updateDecorations(); // Pokreni odmah pri aktivaciji
+    updateDecorations();
 }

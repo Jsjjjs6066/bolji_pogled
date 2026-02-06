@@ -286,7 +286,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             { name: "White", hex: "#FFFFFF" }
         ];
 
-        // Initialize preset buttons
         function initializePresets() {
             const errorPresetsContainer = document.getElementById('errorPresets');
             const warningPresetsContainer = document.getElementById('warningPresets');
@@ -308,7 +307,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             return btn;
         }
 
-        // Color picker inputs
         document.getElementById('errorColorPicker').addEventListener('input', (e) => {
             console.log('[webview] errorColorPicker input ->', e.target.value);
             setColor('error', e.target.value);
@@ -319,7 +317,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             setColor('warning', e.target.value);
         });
 
-        // Hex input fields
         document.getElementById('errorHexInput').addEventListener('change', (e) => {
             console.log('[webview] errorHexInput change ->', e.target.value);
             setColor('error', e.target.value);
@@ -330,7 +327,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             setColor('warning', e.target.value);
         });
 
-        // Reset button
         document.getElementById('resetBtn').addEventListener('click', () => {
             vscode.postMessage({ type: 'resetColors' });
         });
@@ -347,7 +343,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             const previewId = type === 'error' ? 'errorPreview' : 'warningPreview';
             const valueId = type === 'error' ? 'errorValue' : 'warningValue';
 
-            // color input only supports #RRGGBB — drop alpha for the picker
             const pickerValue = hex.length === 9 ? hex.slice(0, 7) : hex;
 
             document.getElementById(pickerId).value = pickerValue;
@@ -361,7 +356,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             });
         }
 
-        // Handle messages from extension
         window.addEventListener('message', (event) => {
             const message = event.data;
             console.log('[webview] message from extension ->', message);
@@ -377,7 +371,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             const previewId = type === 'error' ? 'errorPreview' : 'warningPreview';
             const valueId = type === 'error' ? 'errorValue' : 'warningValue';
 
-            // update color picker with #RRGGBB only
             const pickerValue = hex.length === 9 ? hex.slice(0, 7) : hex;
             document.getElementById(pickerId).value = pickerValue;
             document.getElementById(inputId).value = hex;
@@ -385,7 +378,6 @@ export class ColorWebviewProvider implements vscode.WebviewViewProvider {
             document.getElementById(valueId).textContent = hex;
         }
 
-        // Initialize on load
         initializePresets();
     </script>
 </body>

@@ -30,7 +30,6 @@ let webviewProvider: ColorWebviewProvider | undefined;
 export function activate(context: vscode.ExtensionContext) {
   loadColorsFromConfig();
 
-  // Register the webview view provider
   const errHex = vscodeColorToHex(errorColor);
   const warnHex = vscodeColorToHex(warningColor);
 
@@ -163,5 +162,4 @@ async function pickAndSetColor(kind: "error" | "warning"): Promise<void> {
   }
 }
 
-/* compatibility for src/no_lines.ts */
 export { errorColor, warningColor } from "./test/colors";

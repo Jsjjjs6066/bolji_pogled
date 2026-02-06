@@ -1,41 +1,58 @@
 import * as vscode from 'vscode';
-import { errorColor, warningColor } from './colors';
+import * as colorsModule from './colors';
+import { loadColorsFromConfig } from './test/colors';
 
-// Definiramo stil za Error (npr. debeli crveni pravokutnik)
-
+// Show colored decorations for diagnostics and update them when configuration changes
 export function activate(context: vscode.ExtensionContext) {
     const transparency = 0.2;
-    const transparencyborder = 0.6;
-    let error1 = errorColor;
-    error1 = new vscode.Color(error1.red * 255, error1.green * 255, error1.blue * 255, transparencyborder);
-    let error2 = errorColor;
-    error2 = new vscode.Color(error2.red * 255, error2.green * 255, error2.blue * 255, transparency);
-    let warning1 = warningColor;
-    let warning2 = warningColor;
-    warning1 = new vscode.Color(warning1.red * 255, warning1.green * 255, warning1.blue * 255, transparencyborder);
-    warning2 = new vscode.Color(warning2.red * 255, warning2.green * 255, warning2.blue * 255, transparency);
+    const transparencyBorder = 0.6;
 
-    vscode.window.showInformationMessage(`Error color RGBA: (${error1.red}, ${error1.green}, ${error1.blue}, ${error1.alpha})`);
+    let errorDecorationType: vscode.TextEditorDecorationType | undefined;
+    let warningDecorationType: vscode.TextEditorDecorationType | undefined;
 
-    const errorDecorationType = vscode.window.createTextEditorDecorationType({
-        border: `0.5px solid rgba(255, 0, 0, ${transparencyborder})`,
-        borderColor: `rgba(${error1.red}, ${error1.green}, ${error1.blue}, ${error1.alpha})`,
-        backgroundColor: `rgba(${error2.red}, ${error2.green}, ${error2.blue}, ${error2.alpha})`,
-        borderRadius: '5px',
-        overviewRulerLane: vscode.OverviewRulerLane.Full,
-        fontWeight: 'bold',
-    });
+    function rgbaFromColor(c: vscode.Color | undefined, alpha: number) {
+        if (!c) return 'rgba(0, 0, 0, 0)';
+        const r = Math.round(clamp01(c.red) * 255);
+        const g = Math.round(clamp01(c.green) * 255);
+        const b = Math.round(clamp01(c.blue) * 255);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
 
-    const warningDecorationType = vscode.window.createTextEditorDecorationType({
-        border: `0.5px solid rgba(255, 255, 0, ${transparencyborder})`,
-        borderColor: `rgba(${warning1.red}, ${warning1.green}, ${warning1.blue}, ${warning1.alpha})`,
-        backgroundColor: `rgba(${warning2.red}, ${warning2.green}, ${warning2.blue}, ${warning2.alpha})`,
-        borderRadius: '5px',
-        overviewRulerLane: vscode.OverviewRulerLane.Full,
-        textDecoration: 'none',
-        fontWeight: 'bold',
-    });
-    
+    function createDecorationTypes() {
+        // Dispose old ones
+        if (errorDecorationType) {
+            errorDecorationType.dispose();
+        }
+        if (warningDecorationType) {
+            warningDecorationType.dispose();
+        }
+
+        // Get current color values dynamically
+        const currentErrorColor = colorsModule.errorColor;
+        const currentWarningColor = colorsModule.warningColor;
+        console.log('[no_lines] creating decorations with colors:', {
+            errorColor: currentErrorColor,
+            warningColor: currentWarningColor
+        });
+
+        errorDecorationType = vscode.window.createTextEditorDecorationType({
+            border: `0.5px solid ${rgbaFromColor(currentErrorColor, transparencyBorder)}`,
+            borderRadius: '5px',
+            overviewRulerLane: vscode.OverviewRulerLane.Full,
+            backgroundColor: rgbaFromColor(currentErrorColor, transparency),
+            fontWeight: 'bold',
+        });
+
+        warningDecorationType = vscode.window.createTextEditorDecorationType({
+            border: `0.5px solid ${rgbaFromColor(currentWarningColor, transparencyBorder)}`,
+            borderRadius: '5px',
+            overviewRulerLane: vscode.OverviewRulerLane.Full,
+            backgroundColor: rgbaFromColor(currentWarningColor, transparency),
+            textDecoration: 'none',
+            fontWeight: 'bold',
+        });
+    }
+
     // Funkcija koja ažurira pravokutnike
     function updateDecorations() {
         const activeEditor = vscode.window.activeTextEditor;
@@ -44,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const diagnostics = vscode.languages.getDiagnostics(activeEditor.document.uri);
-        
+
         const errorRanges: vscode.Range[] = [];
         const warningRanges: vscode.Range[] = [];
 
@@ -56,15 +73,45 @@ export function activate(context: vscode.ExtensionContext) {
             }
         });
 
-        activeEditor.setDecorations(errorDecorationType, errorRanges);
-        activeEditor.setDecorations(warningDecorationType, warningRanges);
-
-        // vscode.window.showInformationMessage(`Pronađeno ${errorRanges.length} errora i ${warningRanges.length} warninga.`);
+        if (errorDecorationType) {
+            activeEditor.setDecorations(errorDecorationType, errorRanges);
+        }
+        if (warningDecorationType) {
+            activeEditor.setDecorations(warningDecorationType, warningRanges);
+        }
     }
 
-    // Pokreni pri otvaranju ili promjeni dokumenta
-    vscode.workspace.onDidChangeTextDocument(() => updateDecorations());
-    vscode.window.onDidChangeActiveTextEditor(() => updateDecorations());
-    vscode.languages.onDidChangeDiagnostics(() => updateDecorations());
-    updateDecorations(); // Pokreni odmah pri aktivaciji
+    // Initialize
+    createDecorationTypes();
+    updateDecorations();
+
+    // Update on relevant events
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(() => updateDecorations()));
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => updateDecorations()));
+    context.subscriptions.push(vscode.languages.onDidChangeDiagnostics(() => updateDecorations()));
+
+    // Recreate decoration types when color config changes
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(async (e) => {
+            if (
+                e.affectsConfiguration('bolji-pogled.errorColor') ||
+                e.affectsConfiguration('bolji-pogled.warningColor')
+            ) {
+                console.log('[no_lines] configuration changed, reloading colors');
+                // Ensure latest values from config are loaded
+                try {
+                    await loadColorsFromConfig();
+                } catch (err) {
+                    console.error('[no_lines] error loading colors:', err);
+                }
+                createDecorationTypes();
+                updateDecorations();
+            }
+        })
+    );
+}
+
+function clamp01(n: number): number {
+    if (Number.isNaN(n)) return 0;
+    return Math.min(1, Math.max(0, n));
 }

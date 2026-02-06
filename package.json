@@ -59,6 +59,36 @@
         "label": "normal-light-theme",
         "uiTheme": "vs",
         "path": "./themes/normal-light-theme.json"
+      },
+      {
+        "label": "deuteranopia-dark-theme",
+        "uiTheme": "vs-dark",
+        "path": "./themes/deuteranopia-dark-theme.json"
+      },
+      {
+        "label": "deuteranopia-white-theme",
+        "uiTheme": "vs",
+        "path": "./themes/deuteranopia-white-theme.json"
+      },
+      {
+        "label": "protanopia-dark-theme",
+        "uiTheme": "vs-dark",
+        "path": "./themes/protanopia-dark-theme.json"
+      },
+      {
+        "label": "protanopia-white-theme",
+        "uiTheme": "vs",
+        "path": "./themes/protanopia-white-theme.json"
+      },
+      {
+        "label": "tritanopia-dark-theme",
+        "uiTheme": "vs-dark",
+        "path": "./themes/tritanopia-dark-theme.json"
+      },
+      {
+        "label": "tritanopia-white-theme",
+        "uiTheme": "vs",
+        "path": "./themes/tritanopia-white-theme.json"
       }
     ]
   },
